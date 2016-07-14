@@ -1,5 +1,8 @@
 package de.uni_hamburg.informatik.svs.securechat;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -13,7 +16,7 @@ class SocketThrdServer extends JFrame {
     private static final int PORT = 4444;
 
     private JTextArea textArea;
-    private ServerSocket server;
+    private SSLServerSocket server;
 
     private SocketThrdServer() {
         textArea = new JTextArea();
@@ -28,7 +31,7 @@ class SocketThrdServer extends JFrame {
 
     private void listenSocket() {
         try {
-            server = new ServerSocket(PORT);
+            server = (SSLServerSocket) SSLServerSocketFactory.getDefault().createServerSocket(PORT);
         } catch (IOException e) {
             System.err.println("Could not listen on port " + PORT + "\n" + "Error: " + e.getMessage());
             System.exit(-1);
@@ -36,7 +39,7 @@ class SocketThrdServer extends JFrame {
         while (true) {
             ClientWorker w;
             try {
-                w = new ClientWorker(server.accept(), textArea);
+                w = new ClientWorker((SSLSocket) server.accept(), textArea);
                 Thread t = new Thread(w);
                 t.start();
             } catch (IOException e) {
